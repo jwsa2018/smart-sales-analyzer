@@ -8,53 +8,46 @@ st.title("📊 Smart Sales Analyzer")
 uploaded_file = st.file_uploader("Upload your sales CSV file", type=["csv"])
 
 if uploaded_file is not None:
-    try:
-        df = pd.read_csv(uploaded_file, encoding='latin1')
-        st.success("✅ File uploaded successfully!")
+    df = pd.read_csv(uploaded_file, encoding='latin1')
+    df['Sales'] = pd.to_numeric(df['Sales'], errors='coerce')
 
-        st.subheader("🔍 Basic Data Preview")
-        st.dataframe(df.head())
+    st.success("✅ File uploaded successfully!")
+    
+    st.subheader("🔍 Basic Data Preview")
+    st.dataframe(df.head())
 
-        if 'Branch' in df.columns and 'Product' in df.columns:
-            # التحليل الأساسي
-            top_branch = df['Branch'].value_counts().idxmax()
-            top_product = df['Product'].value_counts().idxmax()
+    # التحليل الأساسي
+    if 'Branch' in df.columns and 'Product' in df.columns and 'Sales' in df.columns:
+        top_branch = df.groupby('Branch')['Sales'].sum().idxmax()
+        top_product = df.groupby('Product')['Sales'].sum().idxmax()
 
-            st.success(f"🏢 Top-Selling Branch: **{top_branch}**")
-            st.success(f"📦 Most Sold Product: **{top_product}**")
+        st.success(f"🏢 Top-Selling Branch: **{top_branch}**")
+        st.success(f"📦 Most Sold Product: **{top_product}**")
+    else:
+        st.warning("⚠️ File must include 'Branch', 'Product', and 'Sales' columns.")
 
-            # رسم بياني
-            st.subheader("📊 Total Sales per Product")
-            if 'Sales' in df.columns:
-                chart_data = df.groupby('Product')['Sales'].sum().reset_index()
-                fig = px.bar(chart_data, x='Product', y='Sales', color='Product')
-                st.plotly_chart(fig)
-            else:
-                st.warning("⚠️ 'Sales' column not found for plotting.")
+    # رسم بياني
+    if 'Product' in df.columns and 'Sales' in df.columns:
+        st.subheader("📊 Total Sales per Product")
+        fig = px.bar(df.groupby('Product')['Sales'].sum().reset_index(),
+                     x='Product', y='Sales', title='Sales by Product')
+        st.plotly_chart(fig)
 
-            # الشات بوت البسيط
-            st.subheader("💬 Smart Sales Chat")
-            st.write("👎 اسأل سؤالك")
-            question = st.selectbox("✍️ اختر استفسارك", [
-                "كيف أزيد المبيعات؟",
-                "ما هو المنتج الأفضل؟",
-                "ما هو الفرع الأضعف؟",
-                "ما هو التريند الحالي؟"
-            ])
+    # شات بوت بسيط
+    st.subheader("💬 Smart Sales Chat")
+    question = st.selectbox("👂 اسأل سؤالك", [
+        "كيف أزيد المبيعات؟",
+        "ما هو المنتج الأكثر ربحاً؟",
+        "ما هو الفرع الأقوى؟",
+        "ما هي المنتجات الضعيفة؟"
+    ])
 
-            if question == "كيف أزيد المبيعات؟":
-                st.info("💡 روّج أكثر للمنتجات القوية، وقلل المنتجات الضعيفة، وحفّز الفروع الأقل أداء.")
-            elif question == "ما هو المنتج الأفضل؟":
-                st.info(f"🏆 المنتج الأفضل هو: **{top_product}**")
-            elif question == "ما هو الفرع الأضعف؟":
-                weakest_branch = df['Branch'].value_counts().idxmin()
-                st.info(f"📉 أضعف فرع هو: **{weakest_branch}**")
-            elif question == "ما هو التريند الحالي؟":
-                st.info(f"📈 المنتجات الرائجة حاليًا: **{df['Product'].mode()[0]}**")
-
-        else:
-            st.warning("⚠️ Make sure your file includes 'Branch' and 'Product' columns.")
-    except Exception as e:
-        st.error(f"❌ Error loading file: {e}")
-else:
-    st.info("📁 Please upload a CSV file to begin.")
+    if question == "كيف أزيد المبيعات؟":
+        st.info("📈 اروج أكثر للمنتجات القوية، وقلل المنتجات الضعيفة، و حفز الفروع الأقل أداء.")
+    elif question == "ما هو المنتج الأكثر ربحاً؟":
+        st.info(f"🏆 المنتج الأكثر مبيعًا هو: **{top_product}**")
+    elif question == "ما هو الفرع الأقوى؟":
+        st.info(f"🏬 الفرع الأعلى مبيعًا هو: **{top_branch}**")
+    elif question == "ما هي المنتجات الضعيفة؟":
+        weakest = df.groupby('Product')['Sales'].sum().idxmin()
+        st.info(f"📉 المنتج الأضعف مبيعًا هو: **{weakest}**")
