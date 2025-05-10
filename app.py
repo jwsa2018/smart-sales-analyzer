@@ -8,15 +8,13 @@ st.title("📊 Smart Sales Analyzer")
 uploaded_file = st.file_uploader("Upload your sales CSV file", type=["csv"])
 
 if uploaded_file is not None:
-    df = pd.read_csv(uploaded_file, encoding='latin1')
-    df['Sales'] = pd.to_numeric(df['Sales'], errors='coerce')
-
+    df = pd.read_csv(uploaded_file)
     st.success("✅ File uploaded successfully!")
-    
+
     st.subheader("🔍 Basic Data Preview")
     st.dataframe(df.head())
 
-    # التحليل الأساسي
+    # الجزء الأول: التحليل الأساسي
     if 'Branch' in df.columns and 'Product' in df.columns and 'Sales' in df.columns:
         top_branch = df.groupby('Branch')['Sales'].sum().idxmax()
         top_product = df.groupby('Product')['Sales'].sum().idxmax()
@@ -24,30 +22,27 @@ if uploaded_file is not None:
         st.success(f"🏢 Top-Selling Branch: **{top_branch}**")
         st.success(f"📦 Most Sold Product: **{top_product}**")
     else:
-        st.warning("⚠️ File must include 'Branch', 'Product', and 'Sales' columns.")
+        st.warning("⚠️ Missing 'Branch', 'Product' or 'Sales' columns in the file.")
 
-    # رسم بياني
-    if 'Product' in df.columns and 'Sales' in df.columns:
-        st.subheader("📊 Total Sales per Product")
-        fig = px.bar(df.groupby('Product')['Sales'].sum().reset_index(),
-                     x='Product', y='Sales', title='Sales by Product')
-        st.plotly_chart(fig)
+    # الجزء الثاني: رسم بياني
+    st.subheader("📊 Total Sales per Product")
+    product_sales = df.groupby('Product')['Sales'].sum().reset_index()
+    fig = px.bar(product_sales, x='Product', y='Sales', color='Product', title='Sales by Product')
+    st.plotly_chart(fig)
 
-    # شات بوت بسيط
+    # الجزء الثالث: محاكاة شات بوت
     st.subheader("💬 Smart Sales Chat")
     question = st.selectbox("👂 اسأل سؤالك", [
         "كيف أزيد المبيعات؟",
-        "ما هو المنتج الأكثر ربحاً؟",
-        "ما هو الفرع الأقوى؟",
-        "ما هي المنتجات الضعيفة؟"
+        "ما هو المنتج الأقوى؟",
+        "أي فرع هو الأضعف؟",
     ])
 
-    if question == "كيف أزيد المبيعات؟":
-        st.info("📈 اروج أكثر للمنتجات القوية، وقلل المنتجات الضعيفة، و حفز الفروع الأقل أداء.")
-    elif question == "ما هو المنتج الأكثر ربحاً؟":
-        st.info(f"🏆 المنتج الأكثر مبيعًا هو: **{top_product}**")
-    elif question == "ما هو الفرع الأقوى؟":
-        st.info(f"🏬 الفرع الأعلى مبيعًا هو: **{top_branch}**")
-    elif question == "ما هي المنتجات الضعيفة؟":
-        weakest = df.groupby('Product')['Sales'].sum().idxmin()
-        st.info(f"📉 المنتج الأضعف مبيعًا هو: **{weakest}**")
+    if 'Branch' in df.columns and 'Product' in df.columns and 'Sales' in df.columns:
+        if question == "كيف أزيد المبيعات؟":
+            st.info("✨ إروّج أكثر للمنتجات القوية، وقلل المنتجات الضعيفة، وراقب الفروع الأقل أداء.")
+        elif question == "ما هو المنتج الأقوى؟":
+            st.info(f"💡 المنتج الأقوى هو: **{top_product}**")
+        elif question == "أي فرع هو الأضعف؟":
+            worst_branch = df.groupby('Branch')['Sales'].sum().idxmin()
+            st.info(f"📉 أضعف فرع هو: **{worst_branch}**")
