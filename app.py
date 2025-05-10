@@ -3,62 +3,58 @@ import pandas as pd
 import plotly.express as px
 
 st.set_page_config(page_title="Smart Sales Analyzer", layout="centered")
-st.title(" Smart Sales Analyzer")
+st.title("📊 Smart Sales Analyzer")
 
 uploaded_file = st.file_uploader("Upload your sales CSV file", type=["csv"])
 
 if uploaded_file is not None:
-    # قراءة الملف وتنظيف المبيعات
-    df = pd.read_csv(uploaded_file, encoding='latin1')
-    df['Sales'] = pd.to_numeric(df['Sales'], errors='coerce')
-    df.dropna(subset=['Sales'], inplace=True)
+    try:
+        df = pd.read_csv(uploaded_file, encoding='latin1')
+        st.success("✅ File uploaded successfully!")
 
-    st.success("✅ File uploaded successfully!")
-    
-    # عرض البيانات
-    st.subheader("🔍 Basic Data Preview")
-    st.dataframe(df.head())
+        st.subheader("🔍 Basic Data Preview")
+        st.dataframe(df.head())
 
-    # تحليل أساسي
-    if 'Branch' in df.columns and 'Product' in df.columns and 'Sales' in df.columns:
-        top_branch = df.groupby('Branch')['Sales'].sum().idxmax()
-        top_product = df.groupby('Product')['Sales'].sum().idxmax()
+        if 'Branch' in df.columns and 'Product' in df.columns:
+            # التحليل الأساسي
+            top_branch = df['Branch'].value_counts().idxmax()
+            top_product = df['Product'].value_counts().idxmax()
 
-        st.success(f"🏢 Top-Selling Branch: **{top_branch}**")
-        st.success(f"📦 Most Sold Product: **{top_product}**")
+            st.success(f"🏢 Top-Selling Branch: **{top_branch}**")
+            st.success(f"📦 Most Sold Product: **{top_product}**")
 
-        # رسم بياني للمنتجات
-        st.subheader("📊 Total Sales per Product")
-        product_sales = df.groupby('Product')['Sales'].sum().reset_index()
-        fig = px.bar(product_sales, x='Product', y='Sales', color='Product', title='📊 Product Sales')
-        st.plotly_chart(fig)
+            # رسم بياني
+            st.subheader("📊 Total Sales per Product")
+            if 'Sales' in df.columns:
+                chart_data = df.groupby('Product')['Sales'].sum().reset_index()
+                fig = px.bar(chart_data, x='Product', y='Sales', color='Product')
+                st.plotly_chart(fig)
+            else:
+                st.warning("⚠️ 'Sales' column not found for plotting.")
 
-        # رسم بياني للفروع
-        st.subheader("🏢 Total Sales per Branch")
-        branch_sales = df.groupby('Branch')['Sales'].sum().reset_index()
-        fig2 = px.bar(branch_sales, x='Branch', y='Sales', color='Branch', title='🏢 Branch Sales')
-        st.plotly_chart(fig2)
+            # الشات بوت البسيط
+            st.subheader("💬 Smart Sales Chat")
+            st.write("👎 اسأل سؤالك")
+            question = st.selectbox("✍️ اختر استفسارك", [
+                "كيف أزيد المبيعات؟",
+                "ما هو المنتج الأفضل؟",
+                "ما هو الفرع الأضعف؟",
+                "ما هو التريند الحالي؟"
+            ])
 
-        # شات وهمي
-        st.subheader("💬 Smart Sales Chat")
-        question = st.selectbox("👇 اسأل سؤالك", [
-            "كيف أزيد المبيعات؟",
-            "ما أفضل فرع؟",
-            "ما أفضل منتج؟",
-            "ما هي المنتجات الضعيفة؟"
-        ])
+            if question == "كيف أزيد المبيعات؟":
+                st.info("💡 روّج أكثر للمنتجات القوية، وقلل المنتجات الضعيفة، وحفّز الفروع الأقل أداء.")
+            elif question == "ما هو المنتج الأفضل؟":
+                st.info(f"🏆 المنتج الأفضل هو: **{top_product}**")
+            elif question == "ما هو الفرع الأضعف؟":
+                weakest_branch = df['Branch'].value_counts().idxmin()
+                st.info(f"📉 أضعف فرع هو: **{weakest_branch}**")
+            elif question == "ما هو التريند الحالي؟":
+                st.info(f"📈 المنتجات الرائجة حاليًا: **{df['Product'].mode()[0]}**")
 
-        if question == "كيف أزيد المبيعات؟":
-            st.info("📈 روّج للمنتجات القوية، اعمل عروض للضعيفة، وراجع أداء الفروع.")
-        elif question == "ما أفضل فرع؟":
-            st.info(f"🏢 الفرع الأقوى مبيعًا هو: **{top_branch}**")
-        elif question == "ما أفضل منتج؟":
-            st.info(f"📦 المنتج الأعلى مبيعًا هو: **{top_product}**")
-        elif question == "ما هي المنتجات الضعيفة؟":
-            low_product = df.groupby('Product')['Sales'].sum().idxmin()
-            st.warning(f"📉 المنتج الأضعف هو: **{low_product}**")
-    else:
-        st.warning("⚠️ تأكد أن الملف يحتوي على أعمدة: Branch, Product, Sales")
+        else:
+            st.warning("⚠️ Make sure your file includes 'Branch' and 'Product' columns.")
+    except Exception as e:
+        st.error(f"❌ Error loading file: {e}")
 else:
-    st.info("📂 الرجاء رفع ملف CSV لتحليل البيانات.")
-
+    st.info("📁 Please upload a CSV file to begin.")
