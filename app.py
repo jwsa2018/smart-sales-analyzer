@@ -1,19 +1,22 @@
 import streamlit as st
 import pandas as pd
 
+# إعداد الصفحة
 st.set_page_config(page_title="Smart Sales Analyzer", layout="centered")
 st.title("📊 Smart Sales Analyzer")
 
+# رفع الملف
 uploaded_file = st.file_uploader("Upload your sales CSV file", type=["csv"])
 
 if uploaded_file is not None:
-    df = pd.read_csv(uploaded_file, encoding='latin1')
+    df = pd.read_csv(uploaded_file, encoding='latin1')  # لتفادي مشاكل الترميز
     st.success("✅ File uploaded successfully!")
 
+    # عرض البيانات
     st.subheader("🔍 Basic Data Preview")
     st.dataframe(df.head())
 
-    # --- الجزء الأول: التحليل الأساسي ---
+    # --- التحليل الأساسي ---
     if 'Branch' in df.columns and 'Product' in df.columns:
         top_branch = df['Branch'].value_counts().idxmax()
         top_product = df['Product'].value_counts().idxmax()
@@ -23,32 +26,27 @@ if uploaded_file is not None:
     else:
         st.warning("Missing 'Branch' or 'Product' columns in the file.")
 
-    # --- الجزء الثاني: محاكاة شات بوت ---
-    st.subheader("🤖 Smart Sales Chat")
-    question = st.selectbox("اسأل سؤالك 👇", [
+    # --- شات بوت وهمي ---
+    st.subheader("💬 Smart Sales Chat")
+    question = st.selectbox("👇 اسأل سؤالك", [
         "ما هو الفرع الأكثر مبيعًا؟",
         "ما هو المنتج الأكثر مبيعًا؟",
-        "كم عدد المنتجات الموجودة؟",
-        "كم عدد الفروع؟"
+        "كيف أزيد المبيعات؟",
+        "هل هناك منتجات ضعيفة؟"
     ])
 
     if 'Branch' in df.columns and 'Product' in df.columns:
         if question == "ما هو الفرع الأكثر مبيعًا؟":
             top_branch = df['Branch'].value_counts().idxmax()
-            st.info(f"🏢 الفرع الأكثر مبيعًا هو: **{top_branch}**")
+            st.info(f"🔝 الفرع الأكثر مبيعًا هو: **{top_branch}**")
 
         elif question == "ما هو المنتج الأكثر مبيعًا؟":
             top_product = df['Product'].value_counts().idxmax()
-            st.info(f"📦 المنتج الأكثر مبيعًا هو: **{top_product}**")
+            st.info(f"🛒 المنتج الأكثر مبيعًا هو: **{top_product}**")
 
-        elif question == "كم عدد المنتجات الموجودة؟":
-            total_products = df['Product'].nunique()
-            st.info(f"🔢 عدد المنتجات المختلفة هو: **{total_products}**")
+        elif question == "كيف أزيد المبيعات؟":
+            st.info("📈 روّج أكثر للمنتجات القوية، وقلل المنتجات الضعيفة، وحفّز الفروع الأقل أداء!")
 
-        elif question == "كم عدد الفروع؟":
-            total_branches = df['Branch'].nunique()
-            st.info(f"🏬 عدد الفروع هو: **{total_branches}**")
-    else:
-        st.warning("لا يمكن تحليل الأسئلة لأن الأعمدة المطلوبة غير موجودة.")
-else:
-    st.info("📂 الرجاء رفع ملف CSV لتحليل البيانات.")
+        elif question == "هل هناك منتجات ضعيفة؟":
+            low_sellers = df['Product'].value_counts().tail(3).index.tolist()
+            st.info(f"🔻 المنتجات الأقل مبيعًا: {', '.join(low_sellers)}")
