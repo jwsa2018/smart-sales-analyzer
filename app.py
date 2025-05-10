@@ -6,7 +6,7 @@ st.title("📊 Smart Sales Analyzer")
 uploaded_file = st.file_uploader("Upload your sales CSV file", type=["csv"])
 
 if uploaded_file is not None:
-    df = pd.read_csv(uploaded_file)
+    df = pd.read_csv(uploaded_file, encoding='latin1') 
 
     st.subheader("Data Preview")
     st.dataframe(df.head())
