@@ -4,18 +4,18 @@ import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="Smart Sales Analyzer")
 
-# اللغة
-lang = st.radio("🌐 اختر اللغة | Choose Language", ["English", "العربية"], horizontal=True)
+
+lang = st.radio("اختر اللغة | Choose Language", ["English", "العربية"], horizontal=True)
 is_ar = lang == "العربية"
 
-# نصوص حسب اللغة
+   
 texts = {
-    "title": "📊 محلل المبيعات الذكي" if is_ar else "📊 Smart Sales Analyzer",
+    "title": " محلل المبيعات الذكي" if is_ar else " Smart Sales Analyzer",
     "upload": "ارفع ملف CSV" if is_ar else "Upload CSV file",
-    "success": "✅ تم رفع الملف بنجاح!" if is_ar else "✅ File uploaded successfully!",
-    "preview": "📋 معاينة البيانات" if is_ar else "📋 Data Preview",
-    "chart": "📊 الرسم البياني حسب '{}'" if is_ar else "📊 Sales by '{}'",
-    "ask": "💬 يمكنك سؤال الشات بوت:" if is_ar else "💬 You can ask the chatbot:",
+    "success": " تم رفع الملف بنجاح!" if is_ar else " File uploaded successfully!",
+    "preview": " معاينة البيانات" if is_ar else " Data Preview",
+    "chart": "الرسم البياني حسب '{}'" if is_ar else " Sales by '{}'",
+    "ask": "يمكنك سؤال الشات بوت:" if is_ar else " You can ask the chatbot:",
     "questions": [
         "ما هو أكثر فرع مبيعًا؟",
         "ما هو المنتج الأكثر مبيعًا؟",
@@ -25,15 +25,15 @@ texts = {
         "What is the top selling product?",
         "What is the least profit?"
     ],
-    "chat_response": "🤖 رد الشات بوت" if is_ar else "🤖 Chatbot Response",
+    "chat_response": " رد الشات بوت" if is_ar else " Chatbot Response",
     "input": "اكتب سؤالك هنا:" if is_ar else "Ask your question:",
-    "unknown": "❓ آسف، لم أفهم السؤال. جرب سؤالاً من القائمة أعلاه." if is_ar else "❓ Sorry, I didn't understand. Try one of the listed questions.",
+    "unknown": " آسف، لم أفهم السؤال. جرب سؤالاً من القائمة أعلاه." if is_ar else " Sorry, I didn't understand. Try one of the listed questions.",
     "top": "الأعلى مبيعًا هو: {}" if is_ar else "Top selling {}: {}",
     "least": "الأقل ربحًا هو: {}" if is_ar else "Least profit {}: {}",
-    "error": "❌ خطأ: {}" if is_ar else "❌ Error: {}"
+    "error": " خطأ: {}" if is_ar else " Error: {}"
 }
 
-# عرض العنوان
+
 st.title(texts["title"])
 st.write(texts["upload"])
 
